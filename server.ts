@@ -1,1 +1,1 @@
-console.log("Welcome to Litista Backend")
+console.log('Welcome to Litista Backend');
