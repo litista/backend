@@ -15,7 +15,7 @@ export const registerHandler = async (
     // validation
     const { name, username, email, password } = req.body;
     if (!name || !username || !email || !password) {
-      throw createHttpError(400, 'All fields are required');
+      throw createHttpError(BAD_REQUEST, 'All fields are required');
     }
 
     if (password.length < 8) {
