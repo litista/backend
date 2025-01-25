@@ -1,15 +1,15 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import bcrypt from 'bcrypt';
+import mongoose, { Schema, Document } from 'mongoose';
+
+import { hashValue, compareValue } from '../utils/bcrypt';
 
 interface IUser extends Document {
   username: string;
   email: string;
-  passwordHash: string;
+  password: string;
   isVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
-  hashPassword(password: string): Promise<void>;
-  comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+  comparePassword(value: string): Promise<boolean>;
 }
 
 const userSchema = new Schema(
@@ -32,7 +32,7 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
-    passwordHash: {
+    password: {
       type: String,
       required: true,
       select: false,
@@ -45,18 +45,19 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-userSchema.methods.hashPassword = async function (
-  password: string
-): Promise<void> {
-  this.passwordHash = await bcrypt.hash(password, 10);
-};
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  this.password = await hashValue(this.password);
+  next();
+});
 
 userSchema.methods.comparePassword = async function (
-  password: string,
-  hashedPassword: string
+  value: string
 ): Promise<boolean> {
-  const isMatch = await bcrypt.compare(password, hashedPassword);
-  return isMatch;
+  return compareValue(value, this.password);
 };
 
 const User = mongoose.model<IUser>('User', userSchema);
