@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { hashValue, compareValue } from '../utils/bcrypt';
 
 interface IUser extends Document {
+  name: string;
   username: string;
   email: string;
   password: string;
